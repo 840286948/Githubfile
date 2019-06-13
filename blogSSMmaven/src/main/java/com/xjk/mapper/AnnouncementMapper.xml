@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xjk.dao.AnnouncementDao">
+      <select id="sel_Announcement" parameterType="map" resultType="Announcement">
+      		select * from xjk_announcement
+      		<where>
+      			<if test="status != null">
+      				`status` = #{status}
+      			</if>
+      		</where>
+      		 order by createTime desc
+      		<if test="current != null and length != null">
+      			 limit #{current},#{length}
+      		</if>
+      </select>
+      <select id="queryId" parameterType="int" resultType="Announcement">
+      		select * from xjk_announcement where id = #{id}
+      </select>
+      <select id="sel_count" resultType="Long">
+      		select count(id) from xjk_announcement
+      </select>
+      <insert id="insert_Announcement" parameterType="Announcement">
+      		insert into xjk_announcement values(null,#{announcement_title},#{announcement_content}
+      		,#{announcement_keyword},#{announcement_describe},#{status},#{user.id},now())
+      </insert>
+      <delete id="delete_Announcement" parameterType="String">
+      		delete from xjk_announcement where id in 
+      		<foreach collection="aid" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+      </delete>
+      <update id="update_Announcement" parameterType="Announcement">
+      		update xjk_announcement
+      		<set>
+      			<if test="announcement_title != null and announcement_title != ''">
+      				announcement_title = #{announcement_title},
+      			</if>
+      			<if test="announcement_content != null and announcement_content != ''">
+      				announcement_content = #{announcement_content},
+      			</if>
+      			<if test="announcement_keyword != null and announcement_keyword != ''">
+      				announcement_keyword = #{announcement_keyword},
+      			</if>
+      			<if test="announcement_describe != null and announcement_describe != ''">
+      				announcement_describe = #{announcement_describe},
+      			</if>
+      			<if test="status != null">
+      				status = #{status},
+      			</if>
+      		</set>
+      		where id = #{id}
+      </update>
+</mapper>

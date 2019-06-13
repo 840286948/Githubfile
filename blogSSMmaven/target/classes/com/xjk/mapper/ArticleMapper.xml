@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xjk.dao.ArticleDao">
+	  <resultMap type="Article" id="articleMap">
+	  		<result property="id" column="id"/>
+	  		<result property="article_title" column="title"/>
+	  		<result property="article_content" column="content"/>
+	  		<result property="article_keywords" column="keywords"/>
+	  		<result property="article_describe" column="article_describe"/>
+	  		<result property="article_label" column="label"/>
+	  		<result property="title_image" column="image"/>
+	  		<result property="status" column="status"/>
+	  		<result property="comment_status" column="comment_status"/>
+	  		<result property="zding_status" column="zding_status"/>
+	  		<result property="createTime" column="createTime"/>
+	  		<result property="comment_tota" column="comment_tota"/>
+	  		<result property="article_clicks" column="clicks"/>
+	  		<association property="column" javaType="Column">
+				<id property="id" column="cid"/>
+				<result property="column_name" column="column_name"/>
+			</association>
+			<collection property="comment" ofType="Comment">
+				<id property="id" column="pid"/>
+			</collection>
+	  </resultMap>
+      <insert id="insert_Article" parameterType="Article">
+      		insert into xjk_article values(null,#{article_title},#{article_content},#{article_keywords},
+      		#{article_describe},#{user_id},#{column_id},#{article_label},#{title_image},0,#{status},#{comment_status},
+      		0,null,now())
+      </insert>
+      <select id="sel_count" parameterType="map" resultType="Long">
+      		select count(id) from xjk_article
+      		<where>
+      			<if test="kw != null and kw != ''">
+      				article_keywords like '%${kw}%'
+      			</if>
+      			<if test="status != null">
+      				and `status` = #{status} 
+      			</if>
+      			<if test="column_id != null and column_id != ''">
+      				and column_id = #{column_id}
+      			</if>
+      			<if test="label != null and label != ''">
+      				and article_label like '%${label}%'
+      			</if>
+      		</where>
+      </select>
+      <select id="sel_Limit" parameterType="map" resultMap="articleMap">
+      		select a.id as id,a.article_title as title,a.article_content as content,a.article_label as label,a.clicks,
+      		a.article_keywords as keywords,a.article_describe as article_describe,a.comment_status as comment_status,
+      		a.title_image as image,a.`status` as `status`,a.crateTime as createTime,a.zding_status as zding_status,
+      		c.id as cid,c.column_name as column_name,com.id as pid,count(com.article_id) as comment_tota from xjk_article a 
+      		left join xjk_column c on a.column_id=c.id left join xjk_comment com 
+      		on a.id=com.article_id 
+      		<where>
+      			<if test="kw != null and kw != ''">
+      				and a.article_keywords like '%${kw}%'
+      			</if>
+      			<if test="label != null and label != ''">
+      				and a.article_label like '%${label}%'
+      			</if>
+      			<if test="status != null">
+      				and a.`status` = #{status} 
+      			</if>
+      			<if test="column_id != null and column_id != ''">
+      				and a.column_id = #{column_id}
+      			</if>
+      		</where>
+      		  group by a.id order by 
+      		  <if test="zding != null and zding != ''">
+      		  		a.zding_status desc,a.zding_Time desc
+      		  </if>
+      		  <if test="zding == null and clicks == null">
+      		  		a.crateTime desc
+      		  </if>
+      		  <if test="clicks != null and clicks != ''">
+      		  		a.clicks desc
+      		  </if>
+      		<if test="current != null and length != null">
+      			 limit #{current},#{length}
+      		</if>
+      </select>
+      <select id="query_Id" parameterType="int" resultMap="articleMap">
+      		select a.id as id,a.article_title as title,a.article_content as content,a.article_label as label,a.clicks,
+      		a.article_keywords as keywords,a.article_describe as article_describe,a.zding_status as zding_status,
+      		a.title_image as image,a.`status` as `status`,a.crateTime as createTime,a.comment_status as comment_status,
+      		c.id as cid,c.column_name as column_name from xjk_article a left join xjk_column c 
+      		on a.column_id=c.id where a.id = #{id}
+      </select>
+      <update id="update_Article" parameterType="Article">
+      		update xjk_article
+      			<set>
+      				<if test="article_title != null and article_title != ''">
+      					article_title = #{article_title},
+      				</if>
+      				<if test="article_content != null and article_content != ''">
+      					article_content = #{article_content},
+      				</if>
+      				<if test="article_keywords != null and article_keywords != ''">
+      					article_keywords = #{article_keywords},
+      				</if>
+      				<if test="article_describe != null and article_describe != ''">
+      					article_describe = #{article_describe},
+      				</if>
+      				<if test="article_label != null and article_label != ''">
+      					article_label = #{article_label},
+      				</if>
+      				<if test="title_image != null and title_image != ''">
+      					title_image = #{title_image},
+      				</if>
+      				<if test="status != null">
+      					status = #{status},
+      				</if>
+      				<if test="comment_status != null">
+      					comment_status = #{comment_status},
+      				</if>
+      				<if test="zding_status != null">
+      					zding_status = #{zding_status},zding_Time = now(),
+      				</if>
+      				<if test="column_id != null and column_id != 0">
+      					column_id = #{column_id},
+      				</if>
+      				<if test="article_clicks != null and article_clicks != 0">
+      					clicks = #{article_clicks},
+      				</if>
+      			</set>
+      		where id=#{id}
+      </update>
+      <delete id="delete_Article" parameterType="int">
+     	delete xjk_article,xjk_comment from xjk_article left join xjk_comment 
+     	on xjk_article.id=xjk_comment.article_id where xjk_article.id in 
+     	<foreach collection="aid" item="item" open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+     </delete>
+</mapper>

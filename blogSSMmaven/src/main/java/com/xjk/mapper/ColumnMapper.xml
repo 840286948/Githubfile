@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xjk.dao.ColumnDao">
+	  <resultMap type="Column" id="columnMap">
+	  		<result property="id" column="id"/>
+	  		<result property="column_name" column="column_name"/>
+	  		<result property="column_alias" column="alias"/>
+	  		<collection property="article" ofType="Article">
+	  			<id property="id" column="aid"/>
+	  		</collection>
+	  </resultMap>
+      <select id="query_Id" parameterType="int" resultType="Column">
+      		select * from xjk_column where id = #{cid}
+      </select>
+      <select id="query_name" parameterType="Column" resultType="Column">
+      		select c.column_name as column_name from xjk_column c where c.column_name=#{column_name}
+      		<if test="id != null and id != 0">
+      			and c.id != #{id}
+      		</if>
+      </select>
+      <select id="sel_ColumnAll" resultMap="columnMap">
+      		select c.id as id,c.column_alias as alias,c.column_name as column_name,a.id as aid 
+      		from xjk_column c left join xjk_article a on c.id=a.column_id
+      </select>
+      <insert id="insert_Column" parameterType="Column">
+      		insert into xjk_column values(null,#{column_name},#{column_alias},#{column_keywords},#{column_description},now())
+      </insert>
+      <delete id="delete_Column" parameterType="int">
+      		delete  xjk_column,xjk_article,xjk_comment from xjk_column 
+      		left join xjk_article on xjk_article.column_id=xjk_column.id 
+      		left join xjk_comment on xjk_comment.article_id=xjk_article.id where xjk_column.id=#{id}
+      </delete>
+      <update id="update_Column" parameterType="Column">
+      		update xjk_column set column_name=#{column_name},column_alias=#{column_alias},
+      		column_keywords=#{column_keywords},column_description=#{column_description} 
+      		where id=#{id}
+      </update>
+      <select id="query_All" resultType="Column">
+      		select id,column_name from xjk_column
+      </select>
+</mapper>

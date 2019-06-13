@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xjk.dao.LinkDao">
+      <select id="sel_Limit" parameterType="Map" resultType="Link">
+      		select id,link_name,link_url,link_image from xjk_link 
+      		<if test="current != null and length != null">
+      			limit #{current},#{length}
+      		</if>
+      </select>
+      <select id="sel_count" resultType="Long">
+      		select count(id) from xjk_link
+      </select>
+      <select id="query_Id" parameterType="Integer" resultType="Link">
+      		select * from xjk_link where id = #{id}
+      </select>
+      <insert id="insert_Link" parameterType="Link">
+      		insert into xjk_link values(null,#{link_name},#{link_url},#{link_image},#{link_describe},now())
+      </insert>
+      <delete id="delete_Link" parameterType="int">
+      		delete from xjk_link where id in
+      		<foreach collection="lid" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+      </delete>
+      <update id="update_Link" parameterType="Link">
+      		update xjk_link
+      			<set>
+      				<if test="link_name != null and link_name !=''">
+      					link_name = #{link_name},
+      				</if>
+      				<if test="link_url != null and link_url !=''">
+      					link_url = #{link_url},
+      				</if>
+      				<if test="link_image != null and link_image !=''">
+      					link_image = #{link_image},
+      				</if>
+      				<if test="link_describe != null and link_describe !=''">
+      					link_describe = #{link_describe},
+      				</if>
+      			</set>
+      		where id = #{id}
+      </update>
+</mapper>

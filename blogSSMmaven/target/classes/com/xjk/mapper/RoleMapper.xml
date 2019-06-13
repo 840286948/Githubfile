@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xjk.dao.RoleDao">
+ 
+     <select id="sel_UserRole" parameterType="int" resultType="int">
+         select user_id from xjk_user_role where role_id=#{roleid}
+     </select>
+     
+     <select id="sel_All" resultType="Role">
+         select * from xjk_role
+     </select>
+     
+     <insert id="insert_UserRole" parameterType="Map">
+     		insert into xjk_user_role values
+     		<foreach collection="userids" item="uid" separator=",">
+     			(null,#{uid},#{roleid})
+     		</foreach>
+     </insert>
+     <delete id="delete_UserRole" parameterType="Map">
+     		delete from xjk_user_role where role_id = #{roleid} and user_id in 
+	     	<foreach collection="userids" item="uid" open="(" close=")" separator=",">
+				#{uid}
+			</foreach>
+     </delete>
+     <insert id="insert_Role" parameterType="Role">
+     	insert into xjk_role values(null,#{role_name},#{role_describe},0,now())
+     </insert>
+     <delete id="delete_Role" parameterType="int">
+     	delete xjk_role,xjk_user_role from xjk_role 
+     	left join xjk_user_role on xjk_role.id=xjk_user_role.role_id where xjk_role.id=#{id}
+     </delete>
+     <select id="sel_userRoleCount" resultType="Long">
+     	select count(xur.id) from xjk_user_role xur left join xjk_role r on xur.role_id=r.id where r.role_name = '管理员'
+     </select>
+</mapper>

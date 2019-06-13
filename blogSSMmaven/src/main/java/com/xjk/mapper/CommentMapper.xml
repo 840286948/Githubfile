@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xjk.dao.CommentDao">
+	  <resultMap type="Comment" id="commentMap">
+	  		<result property="id" column="id"/>
+	  		<result property="comment_content" column="comment_content"/>
+	  		<result property="ip" column="ip"/>
+	  		<result property="ipaddress" column="ipaddress"/>
+	  		<result property="status" column="status"/>
+	  		<result property="createTime" column="createTime"/>
+	  		<association property="article" javaType="Article">
+	  			<id property="id" column="aid"/>
+	  			<result property="article_title" column="article_title"/>
+	  		</association>
+	  </resultMap>
+      <select id="sel_All" parameterType="map" resultType="Comment">
+      		select * from xjk_comment 
+      		<where>
+      			<if test="articleId != null and articleId != 0">
+      				article_id = #{articleId}
+      			</if>
+      		</where>
+      		order by 
+      		<if test="status != null">
+      			`status` asc,
+      		</if>
+      		createTime desc
+      		limit #{currentPage},#{length}
+      </select>
+      <delete id="delete_Comment" parameterType="int">
+      		delete from xjk_comment where id in
+      		<foreach collection="cid" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+      </delete>
+      <select id="query_id" parameterType="int" resultMap="commentMap">
+      		select c.id,c.comment_content,c.ip,c.ipaddress,a.id as aid,a.article_title from xjk_comment c 
+      		left join xjk_article a on c.article_id=a.id where c.id=#{cid}
+      </select>
+      <update id="update_Comment" parameterType="int">
+      		update xjk_comment set status = 1 where id = #{cid}
+      </update>
+      <select id="sel_count" parameterType="int" resultType="Long">
+      		select count(id) from xjk_comment
+      		<where>
+      			<if test="status == 0">
+      				status = #{status}
+      			</if>
+      			<if test="status != 0 and status != -1">
+      				article_id = #{status}
+      			</if>
+      		</where>
+      </select>
+      <insert id="insert_Comment" parameterType="Comment">
+      		insert into xjk_comment values(null,#{comment_content},#{ip},#{article.id},0,#{ipaddress},now())
+      </insert>
+</mapper>

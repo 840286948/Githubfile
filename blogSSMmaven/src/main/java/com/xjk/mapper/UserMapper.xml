@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="com.xjk.dao.UserDao">
+ 	<resultMap type="User" id="userMap">
+ 		<result property="id" column="id"/>
+ 		<result property="realname" column="realname"/>
+ 		<result property="username" column="username"/>
+ 		<result property="telephone" column="telephone"/>
+ 		<result property="status" column="status"/>
+ 		<result property="createTime" column="createTime"/>
+ 		<collection property="article" ofType="Article">
+ 			<id property="id" column="aid"/>
+ 			<result property="article_title" column="article_title"/>
+ 		</collection>
+ 		<collection property="userLog" ofType="UserLog">
+ 			<id property="id" column="lid"/>
+ 			<result property="createTime" column="log_Time"/>
+ 			<result property="user_id" column="uid"/>
+ 		</collection>
+ 	</resultMap>
+     <select id="sel_Name" parameterType="String" resultType="User">
+        select s.id,s.realname,s.username,s.password,s.telephone,s.status from xjk_user s 
+        <where>
+            s.username=#{username} and status != 2
+        </where>
+     </select>
+     <select id="sel_User" resultMap="userMap">
+        select u.id,u.status,u.realname,u.username,u.telephone,u.createTime,a.id as aid,
+        a.article_title as article_title,ul.createTime as log_Time,ul.id as lid,ul.user_id as uid
+        from xjk_user u left join xjk_article a on u.id=a.user_id 
+        left join xjk_userlog ul on ul.user_id=u.id where u.status != 2
+     </select>
+     <select id="queryById" parameterType="int" resultType="User">
+     	select s.id,s.realname,s.password,s.username,s.telephone from xjk_user s where id=#{id}
+     </select>
+     <insert id="insert_User" parameterType="User">
+        insert into xjk_user values (null,#{realname},#{username},#{password},#{telephone},#{status},now())
+     </insert>
+     <delete id="delete_User" parameterType="int">
+     	delete from xjk_user where id = #{id}
+     </delete>
+     <update id="update_User" parameterType="User">
+     	update xjk_user
+     	<set>
+     		<if test="username != null and username != ''">
+     			username=#{username},
+     		</if>
+     		<if test="password != null and password != ''">
+     			password=#{password},
+     		</if>
+     		<if test="telephone != null and telephone != ''">
+     			telephone=#{telephone},
+     		</if>
+     		<if test="realname != null and realname != ''">
+     			realname=#{realname},
+     		</if>
+     		<if test="status != null">
+     			status=#{status},
+     		</if>
+     	</set>
+     	where id = #{id}
+     </update>
+     
+     <select id="sel_All" parameterType="String" resultType="User">
+     	select u.id,u.username from xjk_user u where status != 2
+     </select>
+ </mapper>
